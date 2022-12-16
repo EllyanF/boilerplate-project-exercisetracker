@@ -76,8 +76,10 @@ app.post('/api/users/:_id/exercises', (req, res) => {
 
 app.get('/api/users/:_id/logs', (req, res) => {
   connect();
+  var { from: startDate, to: endDate, limit: maximun } = req.query;
+
   User.findById(req.params._id).exec((err, user) => {
-    Exercise.find({ user_id: user._id }, (err, documents) => {
+    Exercise.find({ utc: { $gte: startDate, $lte: endDate }, user_id: user._id }).limit(maximun).exec((err, documents) => {
       err ? console.error(err) : res.json({
         "_id": user._id,
         "username": user.username,
