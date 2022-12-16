@@ -17,9 +17,10 @@ const personSchema = mongoose.Schema({
 });
 
 const exerciseSchema = mongoose.Schema({
+  user_id: { type: String, required: true },
   description: { type: String, required: true },
   duration: { type: Number, required: true },
-  date: { type: String }
+  date: { type: String },
 })
 
 let User = mongoose.model('User', personSchema);
@@ -28,14 +29,13 @@ let Exercise = mongoose.model('Exercise', exerciseSchema);
 const connect = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    console.log(mongoose.connection.readyState);
   } catch (e) {
     console.error(e);
   }
 }
 
 const checkDate = (date) => {
-  if (typeof date === 'undefined') {
+  if (typeof date == 'undefined') {
     return new Date(Date.now()).toDateString();
   } else {
     return new Date(date).toDateString();
@@ -60,15 +60,30 @@ app.get('/api/users', (req, res) => {
 app.post('/api/users/:_id/exercises', (req, res) => {
   connect();
   const body = req.body;
-  const user = User.findById(req.params._id, (err, userFound) => { return userFound });
-  const date = checkDate(body.date);
-  Exercise.create({ description: body.description, duration: body.duration, date: body.date }, (err, data) => {
-    err ? console.error(err) : res.json({
-      "_id": user._id,
-      "username": user.username,
-      "date": date,
-      "duration": data.duration,
-      "description": data.description
+  const date = checkDate(req.params.date);
+  User.findById(req.params._id).exec((err, user) => {
+    Exercise.create({ user_id: user._id, description: body.description, duration: body.duration, date: date }, (err, data) => {
+      err ? console.error(err) : res.json({
+        "_id": user._id,
+        "username": user.username,
+        "date": data.date,
+        "duration": data.duration,
+        "description": data.description,
+      });
+    });
+  });
+});
+
+app.get('/api/users/:_id/logs', (req, res) => {
+  connect();
+  User.findById(req.params._id).exec((err, user) => {
+    Exercise.find({ user_id: user._id }, (err, documents) => {
+      err ? console.error(err) : res.json({
+        "_id": user._id,
+        "username": user.username,
+        "count": documents.length,
+        "log": documents
+      });
     });
   });
 });
