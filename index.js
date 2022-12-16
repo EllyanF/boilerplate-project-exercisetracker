@@ -35,7 +35,7 @@ const connect = async () => {
 }
 
 const checkDate = (date) => {
-  if (typeof date == 'undefined') {
+    if (!date) {
     return new Date(Date.now()).toDateString();
   } else {
     return new Date(date).toDateString();
@@ -60,7 +60,7 @@ app.get('/api/users', (req, res) => {
 app.post('/api/users/:_id/exercises', (req, res) => {
   connect();
   const body = req.body;
-  const date = checkDate(req.params.date);
+  const date = checkDate(req.body.date);
   User.findById(req.params._id).exec((err, user) => {
     Exercise.create({ user_id: user._id, description: body.description, duration: body.duration, date: date }, (err, data) => {
       err ? console.error(err) : res.json({
