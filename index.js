@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 require('dotenv').config()
 
 app.use(cors())
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static('public'))
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
@@ -79,7 +79,7 @@ app.get('/api/users/:_id/logs', (req, res) => {
   var { from: startDate, to: endDate, limit: maximun } = req.query;
 
   User.findById(req.params._id).exec((err, user) => {
-    Exercise.find({ utc: { $gte: startDate, $lte: endDate }, user_id: user._id }).limit(maximun).exec((err, documents) => {
+    Exercise.find({ utc: { $gte: startDate, $lte: endDate }, user_id: user._id }).limit(maximun).select({ user_id: 0 }).exec((err, documents) => {
       err ? console.error(err) : res.json({
         "_id": user._id,
         "username": user.username,
