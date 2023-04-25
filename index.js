@@ -35,11 +35,7 @@ const connect = async () => {
 }
 
 const checkDate = (date) => {
-    if (!date) {
-    return new Date(Date.now()).toDateString();
-  } else {
-    return new Date(date).toDateString();
-  }
+  return (!date) ? new Date(Date.now()).toDateString() : Date(date).toDateString();
 }
 
 app.post('/api/users', (req, res) => {
